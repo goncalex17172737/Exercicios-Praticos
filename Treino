@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Treino de Pedalada - Resposta Invertida</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      padding: 50px;
+    }
+    .arrow {
+      font-size: 100px;
+      margin: 40px;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+    }
+    #score {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    #timer {
+      font-size: 20px;
+      margin-top: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Treino de Pedalada ⚽</h1>
+  <p>Veja a seta e pressione a tecla do lado OPOSTO!</p>
+  <div class="arrow" id="arrow">?</div>
+  <div id="feedback"></div>
+  <div id="score">Pontuação: 0</div>
+  <div id="timer">Tempo restante: 3</div>  <!-- Sons --><audio id="sound-correct" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio> <audio id="sound-wrong" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+  <script>
+    const arrowDiv = document.getElementById('arrow');
+    const feedback = document.getElementById('feedback');
+    const scoreDiv = document.getElementById('score');
+    const timerDiv = document.getElementById('timer');
+    const soundCorrect = document.getElementById('sound-correct');
+    const soundWrong = document.getElementById('sound-wrong');
+
+    let currentDirection = '';
+    let score = 0;
+    let timeLeft = 3;
+    let timer;
+
+    function getRandomDirection() {
+      return Math.random() < 0.5 ? 'left' : 'right';
+    }
+
+    function startTimer() {
+      timeLeft = 3;
+      timerDiv.textContent = 'Tempo restante: ' + timeLeft;
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          feedback.textContent = '⏱️ Tempo esgotado!';
+          feedback.className = 'wrong';
+          score = Math.max(0, score - 1);
+          soundWrong.play();
+          scoreDiv.textContent = 'Pontuação: ' + score;
+          setTimeout(showArrow, 1000);
+        } else {
+          timerDiv.textContent = 'Tempo restante: ' + timeLeft;
+        }
+      }, 1000);
+    }
+
+    function showArrow() {
+      currentDirection = getRandomDirection();
+      arrowDiv.textContent = currentDirection === 'left' ? '←' : '→';
+      feedback.textContent = '';
+      arrowDiv.className = 'arrow';
+      startTimer();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        clearInterval(timer);
+        const userChoice = e.key === 'ArrowLeft' ? 'left' : 'right';
+        const correctResponse = currentDirection === 'left' ? 'right' : 'left';
+
+        if (userChoice === correctResponse) {
+          feedback.textContent = 'Certo! (Você enganou o marcador!)';
+          feedback.className = 'correct';
+          soundCorrect.play();
+          score++;
+        } else {
+          feedback.textContent = 'Errado! (Você foi pro mesmo lado)';
+          feedback.className = 'wrong';
+          soundWrong.play();
+          score = Math.max(0, score - 1);
+        }
+        scoreDiv.textContent = 'Pontuação: ' + score;
+        setTimeout(showArrow, 1000);
+      }
+    });
+
+    // Iniciar jogo
+    showArrow();
+  </script></body>
+</html>
